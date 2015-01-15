@@ -2,7 +2,7 @@ MYCODEDIR := .
 
 # Directories to search for header files
 
-SEARCHDIRS := -I- -I${MYCODEDIR}
+# SEARCHDIRS := -I- -I${MYCODEDIR}
 
 # makemake variables
 

@@ -26,28 +26,28 @@ int main(int argc, char **argv){
 	}
 
 	host = argv[1];
-	if(c = strchr(host, '@')){
+	if( (c = strchr(host, '@')) ){
 		user = host;
 		host = c + 1;
 		*c = '\0';
 
-		if(c = strchr(user, ':')){
+		if( (c = strchr(user, ':')) ){
 			pass = c + 1;
 			*c = '\0';
 		}
 	}
 
-	if(c = strchr(host, '/')){
+	if( (c = strchr(host, '/')) ){
 		root = c + 1;
 		*c = '\0';
 	}
 
-	if(c = strchr(host, ':')){
+	if( (c = strchr(host, ':')) ){
 		port = c + 1;
 		*c = '\0';
 	}
 
-	if((hst = gethostbyname(host)) == NULL){
+	if( (hst = gethostbyname(host)) == NULL ){
 		fprintf(stderr, "DNS lookup failed!\n");
 		exit(-1);
 	}
@@ -55,7 +55,7 @@ int main(int argc, char **argv){
 	memcpy(&addr.s_addr,hst->h_addr_list[0], hst->h_length);
 	ip = inet_ntoa(addr);
 
-	if(user && !pass){
+	if( user && !pass ){
 		printf("Please provide the FTP password for user %s:", user);
 		system("stty -echo");
 		do buf[i++] = getchar();
