@@ -1,1 +1,0 @@
-cmd_/home/Soft/Drivers/ftpfs/module/ftpfs.o := ld -m elf_x86_64   -r -o /home/Soft/Drivers/ftpfs/module/ftpfs.o /home/Soft/Drivers/ftpfs/module/net.o /home/Soft/Drivers/ftpfs/module/operations.o /home/Soft/Drivers/ftpfs/module/super.o 
