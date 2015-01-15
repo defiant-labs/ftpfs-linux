@@ -1,5 +1,10 @@
 .directory
 *~
+.tmp_versions
+*.cmd
+Module.symvers
+modules.order
+*.mod.c
 
 # Object files
 *.[aod]
