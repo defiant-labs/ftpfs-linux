@@ -1,0 +1,1 @@
+cmd_/home/Soft/Drivers/ftpfs/module/ftpfs.ko := ld -r -m elf_x86_64 -T /home/Soft/Linux/linux-3.8.13/scripts/module-common.lds --build-id  -o /home/Soft/Drivers/ftpfs/module/ftpfs.ko /home/Soft/Drivers/ftpfs/module/ftpfs.o /home/Soft/Drivers/ftpfs/module/ftpfs.mod.o
