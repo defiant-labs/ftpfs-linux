@@ -15,7 +15,7 @@ all:
 
 mount:
 #	sudo mount -t ftpfs n:a@127.0.0.1:tmp tmp
-	mkdir /tmp/ftpfs-test-mountpoint
+	mkdir -p /tmp/ftpfs-test-mountpoint
 	sudo mount -t ftpfs ftp.cs.brown.edu /tmp/ftpfs-test-mountpoint
 
 umount:
