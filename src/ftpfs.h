@@ -36,7 +36,7 @@ struct ftp_sb_info
     struct ftp_sb_params params; /* parameters */
 };
 
-static inline struct ftp_sb_info* extract_info(struct file* filp)
+static inline struct ftp_sb_info* extract_info(struct file *filp)
 {
     return (struct ftp_sb_info*)filp->f_dentry->d_sb->s_fs_info;
 }

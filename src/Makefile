@@ -4,7 +4,7 @@ CC=gcc
 EXTRA_CFLAGS=-g3 
 
 obj-m := ftpfs.o
-ftpfs-y :=  net.o operations.o super.o
+ftpfs-y := net.o operations.o super.o
 
 PWD:= $(shell pwd)
 KERNEL_SOURCES:= /lib/modules/$(shell uname -r)/build

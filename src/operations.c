@@ -4,11 +4,11 @@
 int ftpfs_init_data_connection(struct ftp_sb_info *info)
 {
     struct sockaddr_in saddr;
-    int r;
+    int r = 0;
     char *send_buffer, *recv_buffer, *tmp;
-    int i1, i2, i3, i4, p1, p2;
-    unsigned int ip;
-    unsigned int port;
+    int i1 = 0, i2 = 0, i3 = 0, i4 = 0, p1 = 0, p2 = 0;
+    uint ip = 0;
+    uint port = 0;
 
     send_buffer = kmalloc(SND_BUFFER_SIZE, GFP_KERNEL);
     recv_buffer = kmalloc(RCV_BUFFER_SIZE, GFP_KERNEL);
@@ -16,7 +16,7 @@ int ftpfs_init_data_connection(struct ftp_sb_info *info)
 
     sprintf(tmp, "PASV\r\n");
     send_reply(info->control, tmp);
-    r=read_response(info->control, recv_buffer);
+    r = read_response(info->control, recv_buffer);
 
     sscanf(recv_buffer,"%d %*s %*s %*s (%d,%d,%d,%d,%d,%d)", &r, &i1, &i2, &i3, &i4, &p1, &p2);
     ip = (i1<<0x18) + (i2<<0x10) + (i3<<0x8) + i4;
@@ -34,6 +34,7 @@ int ftpfs_init_data_connection(struct ftp_sb_info *info)
     r = info->control->ops->connect(info->data,
                                     (struct sockaddr *) &saddr,
                                     sizeof(saddr), O_RDWR);
+
     kfree(send_buffer);
     kfree(recv_buffer);
     kfree(tmp);
@@ -45,7 +46,7 @@ int ftpfs_init_data_connection(struct ftp_sb_info *info)
 int ftpfs_init_connection(struct ftp_sb_info *info)
 {
     struct sockaddr_in saddr;
-    int r;
+    int r = 0;
     char *send_buffer, *recv_buffer, *tmp;
 
     send_buffer = kmalloc(SND_BUFFER_SIZE, GFP_KERNEL);
@@ -54,10 +55,10 @@ int ftpfs_init_connection(struct ftp_sb_info *info)
 
     sock_create(PF_INET, SOCK_STREAM, IPPROTO_TCP, &info->control);
 
-    memset(&saddr,0, sizeof(saddr));
+    memset(&saddr, 0, sizeof(saddr));
     saddr.sin_family = AF_INET;
     saddr.sin_port = htons(CONTROL_PORT);
-    saddr.sin_addr.s_addr =htonl(info->params.host);
+    saddr.sin_addr.s_addr = htonl(info->params.host);
 
     r = info->control->ops->connect(info->control,
                                     (struct sockaddr *) &saddr,
@@ -86,10 +87,10 @@ int ftpfs_init_connection(struct ftp_sb_info *info)
     return 0;
 }
 
-int ftpfs_cd(char *path,struct ftp_sb_info *info)
+int ftpfs_cd(char *path, struct ftp_sb_info *info)
 {
     char *send_buffer, *recv_buffer, *tmp;
-    int r;
+    int r = 0;
 
     send_buffer = kmalloc(SND_BUFFER_SIZE, GFP_KERNEL);
     recv_buffer = kmalloc(RCV_BUFFER_SIZE, GFP_KERNEL);
