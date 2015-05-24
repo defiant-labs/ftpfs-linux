@@ -36,16 +36,19 @@ repeat_send:
     msg.msg_iov->iov_base = (char *) buf + written;
 
     len = sock_sendmsg(sock, &msg, left);
-    if ((len == -ERESTARTSYS) || (!(flags & MSG_DONTWAIT) &&
-                                  (len == -EAGAIN)))
+    if ((len == -ERESTARTSYS) || (!(flags & MSG_DONTWAIT) && (len == -EAGAIN))) {
         goto repeat_send;
+    }
+
     if (len > 0) {
         written += len;
         left -= len;
         if (left)
             goto repeat_send;
     }
+
     set_fs(oldmm);
+
     return written ? written : len;
 }
 
@@ -57,7 +60,6 @@ void send_reply(struct socket *sock, char *str)
 
 int read_response(struct socket *sock, char *str)
 {
-
     struct msghdr msg;
     struct iovec iov;
     int len;
@@ -88,5 +90,6 @@ read_again:
     str[len]='\0';
 
     printk("FTPFS::server:: =  %s\n",str);
+
     return len;
 }

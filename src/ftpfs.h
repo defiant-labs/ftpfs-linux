@@ -17,18 +17,15 @@
 #include <linux/socket.h>
 
 
-
 #define FTPFS_MAGIC 0x19980122
-
 #define CONTROL_PORT 21
-
 
 
 struct ftp_sb_params
 {
     char username[256];
     char password[256];
-    unsigned int  host;
+    uint host;
     char initial_dir[256];
 };
 
@@ -43,4 +40,5 @@ static inline struct ftp_sb_info* extract_info(struct file* filp)
 {
     return (struct ftp_sb_info*)filp->f_dentry->d_sb->s_fs_info;
 }
+
 #endif

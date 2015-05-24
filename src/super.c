@@ -4,64 +4,63 @@
 #include "operations.h"
 #include "super.h"
 
+
 MODULE_AUTHOR("Pawel Pikula, Michal Niec");
-MODULE_DESCRIPTION("Ftp File System");
+MODULE_DESCRIPTION("FTP File System");
 
 
 static struct file_operations ftpfs_file_ops = {
-    .read = ftpfs_read_file,
-    .write = ftpfs_write_file,
+    .read       = ftpfs_read_file,
+    .write      = ftpfs_write_file,
 };
 
 static struct inode_operations ftpfs_inode_ops={
-    .create = ftpfs_create_file,
-    .mkdir = ftpfs_mkdir,
-    .rmdir = ftpfs_rmdir,
-    .rename = ftpfs_rename,
-    .lookup  = simple_lookup,
-    .unlink = ftpfs_unlink,
+    .create     = ftpfs_create_file,
+    .mkdir      = ftpfs_mkdir,
+    .rmdir      = ftpfs_rmdir,
+    .rename     = ftpfs_rename,
+    .lookup     = simple_lookup,
+    .unlink     = ftpfs_unlink,
 };
 
 struct super_operations ftpfs_super_ops = {
-    .statfs         = simple_statfs,
-    .drop_inode     = generic_delete_inode,
+    .statfs     = simple_statfs,
+    .drop_inode = generic_delete_inode,
 };
 static const struct super_operations simple_super_operations = {
-    .statfs         = simple_statfs,
+    .statfs     = simple_statfs,
 };
 
 
 struct tree_descr *  ftpfs_ls(struct ftp_sb_info *info)
 {
     struct tree_descr *files;
-    char *send_buffer,*recv_buffer,*tmp;
+    char *send_buffer, *recv_buffer, *tmp;
     int size;
     char file_name[256];
     int r;
     int i;
-
     char *creds;
 
-    send_buffer = kmalloc(SND_BUFFER_SIZE,GFP_KERNEL);
-    recv_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
-    tmp = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
-    creds=kmalloc(12,GFP_KERNEL);
+    send_buffer = kmalloc(SND_BUFFER_SIZE, GFP_KERNEL);
+    recv_buffer = kmalloc(RCV_BUFFER_SIZE, GFP_KERNEL);
+    tmp = kmalloc(RCV_BUFFER_SIZE, GFP_KERNEL);
+    creds=kmalloc(12, GFP_KERNEL);
 
     sprintf(tmp, "LIST\r\n");
     send_reply(info->control, tmp);
     r=read_response(info->control, recv_buffer);
     read_response(info->data, recv_buffer);
 
-    printk("FTPFS::ls %s\n\n",recv_buffer);
+    printk("FTPFS::ls %s\n\n", recv_buffer);
 
     tmp = recv_buffer;
 
     i = 1;
-    while((tmp = strchr(tmp+1,'\n')))
+    while((tmp = strchr(tmp+1, '\n')))
         i++;
 
-
-    files = kmalloc(sizeof(struct tree_descr)*(i+2),GFP_KERNEL);
+    files = kmalloc(sizeof(struct tree_descr)*(i+2), GFP_KERNEL);
 
     i = 0;
     tmp = recv_buffer;
@@ -76,14 +75,14 @@ struct tree_descr *  ftpfs_ls(struct ftp_sb_info *info)
         if(creds[0] == 'd' ) files[i].mode |= S_IFDIR;
         else if(creds[0] =='-') files[i].mode |= S_IFREG;
         i++;
-        if( unlikely(i==1)) {
+        if( unlikely(i==1) ){
             files[i].name=0;
             files[i].ops=NULL;
             files[i].mode=0;
             i++;
         }
     }
-    files[i].name="";
+    files[i].name = "";
     files[i].ops = NULL;
     files[i].mode = 0;
 
@@ -92,6 +91,7 @@ struct tree_descr *  ftpfs_ls(struct ftp_sb_info *info)
     kfree(creds);
     kfree(send_buffer);
     kfree(recv_buffer);
+
     return files;
 }
 
@@ -101,36 +101,38 @@ static int parse_address(const char* address,struct ftp_sb_params *params)
     char host_buff[16];
     char *pass;
     char *init_dir;
-    int i1,i2,i3,i4;
+    int i1, i2, i3, i4;
 
-    memset(params->username,0,sizeof(params->username));
-    memset(params->password,0,sizeof(params->password));
-    memset(params->initial_dir,0,sizeof(params->initial_dir));
+    memset(params->username, 0, sizeof(params->username));
+    memset(params->password, 0, sizeof(params->password));
+    memset(params->initial_dir, 0, sizeof(params->initial_dir));
 
-    host = strchr(address,'@');
+    host = strchr(address, '@');
 
-    if(host){
-        pass = strchr(address,':');
-        memcpy(params->username,address,pass-address);
-        memcpy(params->password,pass+1,host-pass-1);
+    if( host ){
+        pass = strchr(address, ':');
+        memcpy(params->username, address, pass-address);
+        memcpy(params->password, pass + 1, host-pass - 1);
     }else{
-        host=address;
+        host = address;
     }
-    init_dir = strchr(host,':');
+    init_dir = strchr(host, ':');
 
     if(init_dir){
-        memcpy(host_buff,host+1,16);
-		if(strlen(init_dir+1)!=0)
-			strcpy(params->initial_dir,init_dir+1);
+        memcpy(host_buff,host + 1, 16);
+
+		if(strlen(init_dir + 1) != 0)
+			strcpy(params->initial_dir, init_dir + 1);
 		else
-			strcpy(params->initial_dir,"~");
+			strcpy(params->initial_dir, "~");
     }else{
-        strncpy(host_buff,host,16);
-        strcpy(params->initial_dir,"/");
+        strncpy(host_buff, host, 16);
+        strcpy(params->initial_dir, "/");
     }
 
-    sscanf(host_buff,"%d.%d.%d.%d",&i1,&i2,&i3,&i4);
-    params->host = (i1<<24)+(i2<<16)+(i3<<8)+i4;
+    sscanf(host_buff, "%d.%d.%d.%d", &i1, &i2, &i3, &i4);
+    params->host = (i1<<24) + (i2<<16) + (i3<<8) + i4;
+
     return 0;
 }
 
@@ -141,7 +143,7 @@ static int ftpfs_simple_fill_super(struct super_block *s,unsigned long magic,str
 	struct dentry* root;
 	struct dentry *dentry;
 	struct inode* inode;
-	int  i;
+	int i;
 
 	s->s_blocksize = PAGE_CACHE_SIZE;
 	s->s_blocksize_bits = PAGE_CACHE_SHIFT;
@@ -150,7 +152,7 @@ static int ftpfs_simple_fill_super(struct super_block *s,unsigned long magic,str
 	s->s_time_gran = 1;
 
 	root_inode = new_inode(s);
-	if(!root_inode)
+	if( !root_inode )
 		return -ENOMEM;
 
 	root_inode->i_op = &ftpfs_inode_ops;
@@ -191,11 +193,12 @@ static int ftpfs_simple_fill_super(struct super_block *s,unsigned long magic,str
 		d_add(dentry, inode);
 	}
 
-	s->s_root=root;
+	s->s_root = root;
 	return 0;
 out:
 	d_genocide(root);
 	dput(root);
+
 	return -ENOMEM;
 }
 
@@ -206,19 +209,20 @@ static int ftpfs_fill_super(struct super_block *sb, void *data, int silent)
 	struct ftp_sb_info *info;
 	struct tree_descr *files;
 
-	info = kmalloc(sizeof(struct ftp_sb_info),GFP_KERNEL);
+	info = kmalloc(sizeof(struct ftp_sb_info), GFP_KERNEL);
 
 	parse_address(data,&params);
 	info->params = params;
 
 	ftpfs_init_connection(info);
-	ftpfs_cd(params.initial_dir,info);
+	ftpfs_cd(params.initial_dir, info);
 
 	sb->s_fs_info = info;
 
-	printk("FTPFS::params = username:%s, password:%s, host:%x, init:%s",params.username,params.password,params.host,params.initial_dir);
+	printk("FTPFS::params = username:%s, password:%s, host:%x, init:%s",
+			params.username, params.password, params.host, params.initial_dir);
 
-	files= ftpfs_ls(info);
+	files = ftpfs_ls(info);
 
 	//return simple_fill_super(sb, FTPFS_MAGIC,files);
 	return ftpfs_simple_fill_super(sb,FTPFS_MAGIC,files);
@@ -233,7 +237,7 @@ static struct file_system_type ftpfs_type = {
 	.owner = THIS_MODULE,
 	.name = "ftpfs",
 	.mount = ftpfs_mount,
-	.kill_sb = kill_litter_super,
+	.kill_sb = kill_litter_super
 };
 
 
@@ -244,7 +248,7 @@ static ssize_t ftpfs_read_file(struct file *filp, char *buf, size_t count, loff_
 	char *recv_buffer,*command;
 	struct ftp_sb_info* ftp_info;
 
-	if(*offset==0){
+	if( *offset == 0 ){
 		ftp_info = extract_info(filp);
 
 		recv_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
@@ -322,20 +326,21 @@ static int ftpfs_create_file(struct inode *inode,struct dentry * dentry, umode_t
 #endif
 {
 	const char* filename;
-	int r;
-	char *command,*receive_buffer;
+	int r = 0;
+	char *command, *receive_buffer;
 	//retreive control socket
 	struct ftp_sb_info* ftp_info = (struct ftp_sb_info*)inode->i_sb->s_fs_info;
-	filename=dentry->d_name.name;
+
+	filename = dentry->d_name.name;
 	command = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 	receive_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 
 	sprintf(command,"APPE %s\r\n",filename);
 	send_reply(ftp_info->control,command);
-	r=read_response(ftp_info->control,receive_buffer);
+	r = read_response(ftp_info->control,receive_buffer);
 	ftpfs_init_data_connection(ftp_info);
 	sock_release(ftp_info->data);
-	r=read_response(ftp_info->control,receive_buffer);
+	r = read_response(ftp_info->control,receive_buffer);
 
 	kfree(command);
 	kfree(receive_buffer);
@@ -351,16 +356,17 @@ static int ftpfs_mkdir(struct inode *inode, struct dentry* dentry, umode_t mode)
 {
 	const char* dirname;
 	int r;
-	char *command,*receive_buffer;
+	char *command, *receive_buffer;
 	//retreive control socket
 	struct ftp_sb_info* ftp_info = (struct ftp_sb_info*)inode->i_sb->s_fs_info;
-	dirname=dentry->d_name.name;
+
+	dirname = dentry->d_name.name;
 	command = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 	receive_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 
-	sprintf(command,"MKD %s\r\n",dirname);
-	send_reply(ftp_info->control,command);
-	r=read_response(ftp_info->control,receive_buffer);
+	sprintf(command, "MKD %s\r\n", dirname);
+	send_reply(ftp_info->control, command);
+	r = read_response(ftp_info->control, receive_buffer);
 
 	kfree(command);
 	kfree(receive_buffer);
@@ -372,20 +378,20 @@ static int ftpfs_rmdir(struct inode *inode, struct dentry* dentry)
 {
 	const char* dirname;
 	int r;
-	char *command,*receive_buffer;
+	char *command, *receive_buffer;
 	//retreive control socket
 	struct ftp_sb_info* ftp_info = (struct ftp_sb_info*)inode->i_sb->s_fs_info;
-	dirname=dentry->d_name.name;
+
+	dirname = dentry->d_name.name;
 	command = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 	receive_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 
-	sprintf(command,"RMD %s\r\n",dirname);
-	send_reply(ftp_info->control,command);
-	r=read_response(ftp_info->control,receive_buffer);
+	sprintf(command, "RMD %s\r\n", dirname);
+	send_reply(ftp_info->control, command);
+	r = read_response(ftp_info->control, receive_buffer);
 
 	kfree(command);
 	kfree(receive_buffer);
-
 
 	return 0;
 }
@@ -398,38 +404,41 @@ static int ftpfs_rename(struct inode* inode_src, struct dentry* dentry_src,struc
 	char *command,*receive_buffer;
 	//retreive control socket
 	struct ftp_sb_info* ftp_info = (struct ftp_sb_info*)inode_src->i_sb->s_fs_info;
-	src=dentry_src->d_name.name;
-	dst=dentry_dst->d_name.name;
+
+	src = dentry_src->d_name.name;
+	dst = dentry_dst->d_name.name;
 	command = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 	receive_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 
-	sprintf(command,"RNFR %s\r\n",src);
-	send_reply(ftp_info->control,command);
-	r=read_response(ftp_info->control,receive_buffer);
+	sprintf(command, "RNFR %s\r\n", src);
+	send_reply(ftp_info->control, command);
+	r = read_response(ftp_info->control, receive_buffer);
 
-	sprintf(command,"RNTO %s\r\n",dst);
-	send_reply(ftp_info->control,command);
-	r=read_response(ftp_info->control,receive_buffer);
+	sprintf(command, "RNTO %s\r\n", dst);
+	send_reply(ftp_info->control, command);
+	r = read_response(ftp_info->control, receive_buffer);
 
 	kfree(command);
 	kfree(receive_buffer);
 
 	return 0;
 }
+
 static int ftpfs_unlink(struct inode *inode,struct dentry *dentry)
 {
 	const char* filename;
 	int r;
-	char *command,*receive_buffer;
+	char *command, *receive_buffer;
 	//retreive control socket
 	struct ftp_sb_info* ftp_info = (struct ftp_sb_info*)inode->i_sb->s_fs_info;
-	filename=dentry->d_name.name;
-	command = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
-	receive_buffer = kmalloc(RCV_BUFFER_SIZE,GFP_KERNEL);
 
-	sprintf(command,"DELE %s\r\n",filename);
-	send_reply(ftp_info->control,command);
-	r=read_response(ftp_info->control,receive_buffer);
+	filename = dentry->d_name.name;
+	command = kmalloc(RCV_BUFFER_SIZE, GFP_KERNEL);
+	receive_buffer = kmalloc(RCV_BUFFER_SIZE, GFP_KERNEL);
+
+	sprintf(command, "DELE %s\r\n", filename);
+	send_reply(ftp_info->control, command);
+	r = read_response(ftp_info->control, receive_buffer);
 
 	kfree(command);
 	kfree(receive_buffer);
